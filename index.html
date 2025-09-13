@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Number Hack</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(circle at top, #1a0033, #000);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .card {
+      background: rgba(20, 20, 20, 0.8);
+      backdrop-filter: blur(8px);
+      margin: 14px;
+      padding: 18px;
+      border-radius: 18px;
+      box-shadow: 0 0 15px rgba(255,0,255,0.3), 0 0 25px rgba(0,255,255,0.2);
+      width: 90%;
+      max-width: 420px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.02);
+    }
+
+    .logo {
+      width: 100px;
+      margin-bottom: 12px;
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: #ffcc00;
+      text-shadow: 0 0 8px #ffcc00;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      opacity: 0.85;
+    }
+
+    .circle-container {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 12px 0;
+    }
+
+    .circle {
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      background: rgba(60,60,60,0.5);
+      border: 2px solid #ff00ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 0 12px rgba(255,0,255,0.4);
+    }
+
+    .circle img {
+      width: 100%;
+      height: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .grid img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 10px rgba(0,255,255,0.4);
+    }
+
+    .grid img:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 15px rgba(0,255,255,0.8);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      margin-top: 12px;
+      border: none;
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn-yellow {
+      background: linear-gradient(45deg,#ffcc00,#ff9900);
+      color: black;
+      box-shadow: 0 0 15px rgba(255,200,0,0.7);
+    }
+
+    .btn-yellow:hover {
+      box-shadow: 0 0 25px rgba(255,200,0,1);
+    }
+
+    .btn-dark {
+      background: #222;
+      color: #fff;
+      border: 1px solid #555;
+    }
+
+    .result-images {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin: 12px 0;
+    }
+
+    .result-images img {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      box-shadow: 0 0 15px rgba(0,255,255,0.7);
+    }
+
+    .countdown {
+      margin-top: 8px;
+      font-size: 14px;
+      opacity: 0.8;
+      color: #ff6666;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Logo Div -->
+  <div class="card">
+    <img src="/assets/logo.png" class="logo" alt="Logo">
+    <div class="title">Number Hack</div>
+
+  </div>
+
+  <!-- Input Circles Div -->
+  <div class="card">
+    <div class="subtitle">Fill your last 5 results</div>
+    <div class="circle-container" id="inputCircles">
+      <div class="circle"></div>
+      <div class="circle"></div>
+      <div class="circle"></div>
+      <div class="circle"></div>
+      <div class="circle"></div>
+    </div>
+    <button class="btn btn-dark" onclick="removeLast()">← Back</button>
+  </div>
+
+  <!-- Number Grid Div -->
+  <div class="card">
+    <div class="grid" id="numberGrid"></div>
+  </div>
+
+  <!-- Result Div -->
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="result-images" id="resultImages"></div>
+    <div class="subtitle">Here is your result</div>
+    <div class="countdown" id="countdown"></div>
+  </div>
+
+  <!-- Start Button Div -->
+  <div class="card">
+    <button class="btn btn-yellow" onclick="startPrediction()">Start</button>
+  </div>
+
+  <div class="card">
+  <a href="https://linkopen19.github.io/LinkOpener/HackSellingChannel.html" target="_blank">
+    <button class="btn btn-yellow">Join Telegram</button>
+  </a>
+</div>
+
+
+  <script>
+    const inputCircles = document.getElementById("inputCircles").children;
+    const numberGrid = document.getElementById("numberGrid");
+    const resultCard = document.getElementById("resultCard");
+    const resultImages = document.getElementById("resultImages");
+    const countdown = document.getElementById("countdown");
+    let userInput = [];
+
+    // Load number buttons
+    for (let i = 0; i <= 9; i++) {
+      const img = document.createElement("img");
+      img.src = `assets/${i}.png`;
+      img.onclick = () => selectNumber(i);
+      numberGrid.appendChild(img);
+    }
+
+    function selectNumber(num) {
+      if (userInput.length < 5) {
+        userInput.push(num);
+        updateCircles();
+      }
+    }
+
+    function removeLast() {
+      userInput.pop();
+      updateCircles();
+    }
+
+    function updateCircles() {
+      for (let i = 0; i < 5; i++) {
+        inputCircles[i].innerHTML = userInput[i] !== undefined 
+          ? `<img src="assets/${userInput[i]}.png">` 
+          : "";
+      }
+    }
+
+    function startPrediction() {
+      if (userInput.length < 5) {
+        alert("Please enter last 5 results first!");
+        return;
+      }
+
+      const prediction = generatePrediction(userInput);
+      showResult(prediction);
+
+      // Reset input
+      userInput = [];
+      updateCircles();
+    }
+
+    function generatePrediction(numbers) {
+      let result = [];
+
+      // 1st prediction: sum of last 5 % 10
+      const sum = numbers.reduce((a,b) => a+b, 0);
+      let strongGuess = sum % 10;
+      result.push(strongGuess);
+
+      // 2nd prediction: based on last number trend
+      let last = numbers[numbers.length-1];
+      let altGuess;
+      if (Math.random() > 0.5) {
+        altGuess = (last + 1) % 10; // next number
+      } else {
+        altGuess = (last - 1 + 10) % 10; // previous number
+      }
+
+      if (altGuess === strongGuess) {
+        altGuess = (altGuess + 3) % 10; // ensure uniqueness
+      }
+      result.push(altGuess);
+
+      return result;
+    }
+
+    function showResult(prediction) {
+      resultImages.innerHTML = "";
+      prediction.forEach(num => {
+        const img = document.createElement("img");
+        img.src = `assets/${num}.png`;
+        resultImages.appendChild(img);
+      });
+
+      resultCard.style.display = "block";
+
+      let timeLeft = 3;
+      countdown.textContent = `Result will disappear in ${timeLeft}s`;
+      const timer = setInterval(() => {
+        timeLeft--;
+        countdown.textContent = `Result will disappear in ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          resultCard.style.display = "none";
+        }
+      }, 1000);
+    }
+  </script>
+
+  <!-- Error Popup -->
+<div id="errorPopup" style="
+  display:none;
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255,0,100,0.9);
+  padding: 14px 22px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  box-shadow: 0 0 15px rgba(255,0,150,0.7);
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;">
+  ⚠ Please enter last 5 results first!
+</div>
+
+<style>
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-10px);}
+  to { opacity: 1; transform: translateX(-50%) translateY(0);}
+}
+</style>
+
+<script>
+function showError(msg){
+  const popup = document.getElementById("errorPopup");
+  popup.textContent = "⚠ " + msg;
+  popup.style.display = "block";
+  setTimeout(()=> popup.style.display = "none", 2500);
+}
+
+function startPrediction() {
+  if (userInput.length < 5) {
+    showError("Please enter last 5 results first!");
+    return;
+  }
+
+  const prediction = generatePrediction(userInput);
+  showResult(prediction);
+
+  // Reset input
+  userInput = [];
+  updateCircles();
+}
+</script>
+
+
+</body>
+</html>
