@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>my predicter - 3 Results</title>
+<title>SACHIN LABS - Predictor</title>
 
 <style>
 :root{
@@ -34,13 +34,12 @@ body{
 
 .logo{ width:84px; height:84px; border-radius:50%; margin:8px auto; display:block;}
 .title{ color:var(--accent); font-weight:700; font-size:20px; }
-.subtitle{ font-size:14px; margin-bottom:6px; }
+.subtitle{ font-size:14px; }
 
 .circle-container{
   display:grid;
   grid-template-columns: repeat(5, 1fr);
   gap:8px;
-  justify-items:center;
   margin:10px 0;
   max-height:220px;
   overflow-y:auto;
@@ -74,7 +73,6 @@ body{
   border-radius:10px;
   border:0;
   font-weight:700;
-  cursor:pointer;
   margin-top:8px;
 }
 .btn-yellow{ background:#ffcc00; color:#000; }
@@ -92,7 +90,6 @@ body{
   background:#111;
   padding:18px;
   border-radius:12px;
-  text-align:center;
 }
 
 .result-images{
@@ -105,7 +102,6 @@ body{
   height:64px;
   border-radius:50%;
 }
-
 .error{ color:#ff6666; }
 </style>
 </head>
@@ -120,7 +116,6 @@ body{
 <div class="card">
   <div class="subtitle">Enter last 20 results (20th → 1st)</div>
 
-  <!-- ✅ FIXED (NO JS CREATION) -->
   <div id="inputCircles" class="circle-container">
     <div class="circle">20th</div><div class="circle">19th</div>
     <div class="circle">18th</div><div class="circle">17th</div>
@@ -168,10 +163,10 @@ const labels = [
 "5th","4th","3rd","2nd","1st"
 ];
 
-// 🔢 number buttons
+// 🔥 NUMBER GRID (APK FIXED)
 for(let d=0; d<=9; d++){
   const img=document.createElement('img');
-  img.src=`assets/${d}.png`;
+  img.src = "assets/" + d + ".png";
   img.onclick=()=>selectNumber(d,img);
   numberGrid.appendChild(img);
 }
@@ -212,32 +207,38 @@ function startPrediction(){
   updateCircles();
 }
 
+// 🔥 HARD PREDICTION LOGIC
 function generatePrediction(nums){
   const score=Array(10).fill(0);
   const n=nums.length;
 
   for(let i=0;i<n;i++){
     let w=i+1;
-    if(i>=n-5) w+=6;
-    else if(i>=n-10) w+=3;
+    if(i>=n-5) w+=8;
+    else if(i>=n-10) w+=4;
 
     score[nums[i]]+=w;
 
-    if(i>0 && nums[i]==nums[i-1]) score[nums[i]]+=4;
+    if(i>0 && nums[i]==nums[i-1]) score[nums[i]]+=6;
   }
 
-  nums.forEach(d=>score[d]+=2);
+  nums.forEach(d=>score[d]+=3);
 
-  const avg=Math.round(nums.slice(-5).reduce((a,b)=>a+b)/5)%10;
-  score[avg]+=5;
+  for(let i=1;i<n;i++){
+    let diff=(nums[i]-nums[i-1]+10)%10;
+    score[(nums[n-1]+diff)%10]+=2;
+  }
 
-  const result=[];
-  const used=new Set();
+  let avg=Math.round(nums.slice(-5).reduce((a,b)=>a+b)/5)%10;
+  score[avg]+=6;
+
+  let result=[];
+  let used=new Set();
 
   for(let k=0;k<3;k++){
     let best=-1,bs=-999;
     for(let d=0;d<10;d++){
-      if(!used.has(d)&&score[d]>bs){
+      if(!used.has(d) && score[d]>bs){
         bs=score[d];
         best=d;
       }
@@ -253,7 +254,7 @@ function showResult(pred){
   resultImages.innerHTML="";
   pred.forEach(d=>{
     const img=document.createElement('img');
-    img.src=`assets/${d}.png`;
+    img.src="assets/"+d+".png";
     resultImages.appendChild(img);
   });
   popupMessage.textContent="Next Results";
