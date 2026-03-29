@@ -1,324 +1,255 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>SACHIN LABS - Predictor</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SACHIN LABS - ULTRA PRO</title>
 
 <style>
-:root{
-  --accent:#ffcc00;
-  --bg-start:#1a0033;
-  --bg-end:#000;
-}
 body{
   margin:0;
   font-family:Poppins, sans-serif;
-  background: radial-gradient(circle at top, var(--bg-start), var(--bg-end));
+  background: radial-gradient(circle,#1a0033,#000);
   color:#fff;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  padding:10px;
+  text-align:center;
 }
 
 .card{
   width:95%;
   max-width:420px;
-  background: rgba(20,20,20,0.9);
-  border-radius:12px;
+  margin:10px auto;
   padding:12px;
-  margin:8px 0;
-  text-align:center;
+  background:#111;
+  border-radius:12px;
 }
 
-.logo{ width:84px; height:84px; border-radius:50%; margin:8px auto; display:block;}
-.title{ color:var(--accent); font-weight:700; font-size:20px; }
-.subtitle{ font-size:14px; }
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.grid img{width:50px;border-radius:50%;cursor:pointer;}
 
 .circle-container{
   display:grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap:8px;
-  margin:10px 0;
-  max-height:220px;
-  overflow-y:auto;
+  grid-template-columns:repeat(5,1fr);
+  gap:6px;
 }
-
 .circle{
-  width:44px; height:44px;
+  width:44px;height:44px;
   border-radius:50%;
-  background: rgba(60,60,60,0.45);
-  border:1.5px solid #ff00ff;
-  display:flex; align-items:center; justify-content:center;
+  background:#222;
+  display:flex;align-items:center;justify-content:center;
   font-size:12px;
 }
-.circle img{ width:100%; height:100%; }
-
-.grid{
-  display:grid;
-  grid-template-columns: repeat(5,1fr);
-  gap:10px;
-}
-.grid img{
-  width:52px; height:52px;
-  border-radius:50%;
-  cursor:pointer;
-}
-.grid img.clicked{ transform:scale(1.2); }
 
 .btn{
   width:100%;
-  padding:12px;
-  border-radius:10px;
+  padding:10px;
   border:0;
-  font-weight:700;
+  border-radius:8px;
   margin-top:8px;
 }
-.btn-yellow{ background:#ffcc00; color:#000; }
-.btn-dark{ background:#222; color:#fff; }
+.yellow{background:#ffcc00;color:#000;}
+.dark{background:#333;color:#fff;}
 
 .popup{
-  display:none;
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.75);
+  background:rgba(0,0,0,0.8);
+  display:none;
   align-items:center;
   justify-content:center;
 }
 .popup-content{
   background:#111;
-  padding:18px;
-  border-radius:12px;
+  padding:20px;
+  border-radius:10px;
 }
 
-.result-images{
-  display:flex;
-  gap:12px;
-  justify-content:center;
-}
-.result-images img{
-  width:64px;
-  height:64px;
+.result img{
+  width:60px;
   border-radius:50%;
+  margin:5px;
 }
-.error{ color:#ff6666; }
-</style>
 
+.best{
+  border:3px solid gold;
+}
+</style>
 </head>
 
 <body>
 
 <div class="card">
-  <img src="logo.png" class="logo">
-  <div class="title">SACHIN LABS</div>
+<h2>SACHIN LABS 🔥 ULTRA PRO</h2>
 </div>
 
 <div class="card">
-  <div class="subtitle">Enter last 20 results (20th → 1st)</div>
-
-  <div id="inputCircles" class="circle-container">
-    <div class="circle">20th</div><div class="circle">19th</div>
-    <div class="circle">18th</div><div class="circle">17th</div>
-    <div class="circle">16th</div><div class="circle">15th</div>
-    <div class="circle">14th</div><div class="circle">13th</div>
-    <div class="circle">12th</div><div class="circle">11th</div>
-    <div class="circle">10th</div><div class="circle">9th</div>
-    <div class="circle">8th</div><div class="circle">7th</div>
-    <div class="circle">6th</div><div class="circle">5th</div>
-    <div class="circle">4th</div><div class="circle">3rd</div>
-    <div class="circle">2nd</div><div class="circle">1st</div>
-  </div>
-
-<button class="btn btn-dark" onclick="removeLast()">← Back</button>
-
+<div id="circles" class="circle-container"></div>
+<button class="btn dark" onclick="removeLast()">← Back</button>
+<button class="btn dark" onclick="resetAll()">Reset</button>
 </div>
 
 <div class="card">
-  <div id="numberGrid" class="grid"></div>
+<div id="grid" class="grid"></div>
 </div>
 
 <div class="card">
-  <button class="btn btn-yellow" onclick="startPrediction()">Start</button>
+<button class="btn yellow" onclick="start()">START PREDICTION</button>
 </div>
 
-<div id="resultPopup" class="popup">
-  <div class="popup-content">
-    <div id="resultImages" class="result-images"></div>
-    <div id="popupMessage"></div>
-  </div>
+<div id="popup" class="popup">
+<div class="popup-content">
+<div id="result" class="result"></div>
+<div id="confidence"></div>
+</div>
 </div>
 
 <script>
-const inputCircles = document.getElementById('inputCircles').children;
-const numberGrid = document.getElementById('numberGrid');
-const resultPopup = document.getElementById('resultPopup');
-const resultImages = document.getElementById('resultImages');
-const popupMessage = document.getElementById('popupMessage');
+let input=[];
+const circlesDiv=document.getElementById("circles");
 
-let userInput = [];
-
-const labels = [
-"20th","19th","18th","17th","16th",
-"15th","14th","13th","12th","11th",
-"10th","9th","8th","7th","6th",
-"5th","4th","3rd","2nd","1st"
-];
-
-// GRID
-for(let d=0; d<=9; d++){
-  const img=document.createElement('img');
-  img.src = "assets/" + d + ".png";
-  img.onclick=()=>selectNumber(d,img);
-  numberGrid.appendChild(img);
+// init circles
+for(let i=20;i>=1;i--){
+  let d=document.createElement("div");
+  d.className="circle";
+  d.innerText=i+"th";
+  circlesDiv.appendChild(d);
 }
 
-function selectNumber(num,el){
-  if(userInput.length<20){
-    userInput.push(num);
-    updateCircles();
+// grid
+const grid=document.getElementById("grid");
+for(let i=0;i<=9;i++){
+  let img=document.createElement("img");
+  img.src="assets/"+i+".png";
+  img.onclick=()=>select(i);
+  grid.appendChild(img);
+}
+
+function select(n){
+  if(input.length<20){
+    input.push(n);
+    saveHistory(n);
+    update();
   }
-  el.classList.add('clicked');
-  setTimeout(()=>el.classList.remove('clicked'),120);
+}
+
+function update(){
+  let c=circlesDiv.children;
+  for(let i=0;i<20;i++){
+    if(input[i]!=undefined){
+      c[i].innerHTML="<img src='assets/"+input[i]+".png' width='100%'>";
+    }else{
+      c[i].innerText=(20-i)+"th";
+    }
+  }
 }
 
 function removeLast(){
-  userInput.pop();
-  updateCircles();
+  input.pop();
+  update();
 }
 
-function updateCircles(){
-  for(let i=0;i<20;i++){
-    if(userInput[i]!=undefined){
-      inputCircles[i].innerHTML=`<img src="assets/${userInput[i]}.png">`;
-    }else{
-      inputCircles[i].textContent=labels[i];
-    }
-  }
+function resetAll(){
+  input=[];
+  update();
 }
 
-function startPrediction(){
-  if(userInput.length<20){
-    showError("Enter 20 results first!");
-    return;
-  }
-  const res=generatePrediction(userInput);
-  showResult(res);
-
-  userInput=[];
-  updateCircles();
+// 🔥 LOCAL STORAGE LEARNING
+function saveHistory(n){
+  let h=JSON.parse(localStorage.getItem("history")||"[]");
+  h.push(n);
+  if(h.length>200) h.shift();
+  localStorage.setItem("history",JSON.stringify(h));
 }
 
-// 🔥 AI LEVEL LOGIC
-function generatePrediction(nums){
-  const score = Array(10).fill(0);
-  const n = nums.length;
+// 🔥 ULTRA AI
+function predict(nums){
+  let score=Array(10).fill(0);
+  let n=nums.length;
+  let last=nums[n-1];
 
-  // strong recent + streak
+  // recent heavy
   for(let i=0;i<n;i++){
-    let w = 5;
-    if(i>=n-3) w=20;
-    else if(i>=n-6) w=15;
-    else if(i>=n-10) w=10;
+    let w=5;
+    if(i>=n-3) w=30;
+    else if(i>=n-6) w=20;
+    score[nums[i]]+=w;
+  }
 
-    score[nums[i]] += w;
+  // freq
+  let f=Array(10).fill(0);
+  nums.forEach(x=>f[x]++);
+  for(let i=0;i<10;i++) score[i]+=f[i]*5;
 
-    if(i>0 && nums[i]===nums[i-1]){
-      score[nums[i]] += 12;
+  // markov
+  for(let i=0;i<n-1;i++){
+    if(nums[i]==last){
+      score[nums[i+1]]+=25;
     }
   }
 
-  // frequency
-  const freq = Array(10).fill(0);
-  nums.forEach(d=>freq[d]++);
-  for(let d=0;d<10;d++){
-    score[d]+=freq[d]*3;
-  }
-
-  // pattern diff
-  for(let i=2;i<n;i++){
-    let d1=(nums[i]-nums[i-1]+10)%10;
-    let d2=(nums[i-1]-nums[i-2]+10)%10;
-    if(d1===d2){
-      score[(nums[n-1]+d1)%10]+=8;
+  // pair pattern
+  if(n>=2){
+    let a=nums[n-2],b=nums[n-1];
+    for(let i=0;i<n-2;i++){
+      if(nums[i]==a && nums[i+1]==b){
+        score[nums[i+2]]+=20;
+      }
     }
   }
 
-  // mirror
-  score[(10-nums[n-1])%10]+=6;
-
-  // even/odd balance
-  let even=nums.filter(x=>x%2===0).length;
-  let odd=n-even;
-  if(even>odd){
-    for(let i=1;i<10;i+=2) score[i]+=2;
-  }else{
-    for(let i=0;i<10;i+=2) score[i]+=2;
-  }
-
-  // high/low balance
-  let low=nums.filter(x=>x<5).length;
-  let high=n-low;
-  if(low>high){
-    for(let i=5;i<10;i++) score[i]+=2;
-  }else{
-    for(let i=0;i<5;i++) score[i]+=2;
+  // history learning
+  let hist=JSON.parse(localStorage.getItem("history")||"[]");
+  for(let i=0;i<hist.length-1;i++){
+    if(hist[i]==last){
+      score[hist[i+1]]+=10;
+    }
   }
 
   // avoid repeat
-  score[nums[n-1]]-=10;
+  score[last]-=20;
 
-  // probability normalize
+  // normalize
   let total=score.reduce((a,b)=>a+b,0);
-  let prob=score.map(s=>s/total);
+  let prob=score.map(x=>x/total);
 
-  function pick(){
-    let r=Math.random(),sum=0;
-    for(let i=0;i<10;i++){
-      sum+=prob[i];
-      if(r<=sum) return i;
-    }
-  }
-
-  let result=[];
-  let used=new Set();
-
-  while(result.length<3){
-    let p=pick();
-    if(!used.has(p)){
-      result.push(p);
-      used.add(p);
-    }
-  }
-
-  return result;
+  return prob;
 }
 
-function showResult(pred){
-  resultImages.innerHTML="";
-  pred.forEach(d=>{
-    const img=document.createElement('img');
-    img.src="assets/"+d+".png";
-    resultImages.appendChild(img);
+function start(){
+  if(input.length<20){
+    alert("Enter 20 values");
+    return;
+  }
+
+  let prob=predict(input);
+
+  // pick top 3
+  let arr=prob.map((p,i)=>({num:i,p:p}));
+  arr.sort((a,b)=>b.p-a.p);
+
+  show(arr.slice(0,3));
+  resetAll();
+}
+
+function show(list){
+  let res=document.getElementById("result");
+  let conf=document.getElementById("confidence");
+
+  res.innerHTML="";
+  list.forEach((x,i)=>{
+    let img=document.createElement("img");
+    img.src="assets/"+x.num+".png";
+    if(i==0) img.classList.add("best");
+    res.appendChild(img);
   });
-  popupMessage.textContent="Next Results";
-  resultPopup.style.display="flex";
-  setTimeout(()=>resultPopup.style.display="none",3000);
+
+  conf.innerHTML=
+    "Best: "+list[0].num+" ("+(list[0].p*100).toFixed(1)+"%)";
+
+  document.getElementById("popup").style.display="flex";
+  setTimeout(()=>popup.style.display="none",3000);
 }
 
-function showError(msg){
-  resultImages.innerHTML="";
-  popupMessage.className="error";
-  popupMessage.textContent=msg;
-  resultPopup.style.display="flex";
-  setTimeout(()=>{
-    resultPopup.style.display="none";
-    popupMessage.className="";
-  },2000);
-}
-
-updateCircles();
+update();
 </script>
 
 </body>
