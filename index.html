@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -104,6 +105,7 @@ body{
 }
 .error{ color:#ff6666; }
 </style>
+
 </head>
 
 <body>
@@ -129,7 +131,8 @@ body{
     <div class="circle">2nd</div><div class="circle">1st</div>
   </div>
 
-  <button class="btn btn-dark" onclick="removeLast()">← Back</button>
+<button class="btn btn-dark" onclick="removeLast()">← Back</button>
+
 </div>
 
 <div class="card">
@@ -163,7 +166,7 @@ const labels = [
 "5th","4th","3rd","2nd","1st"
 ];
 
-// ✅ GRID (APK FIXED)
+// GRID
 for(let d=0; d<=9; d++){
   const img=document.createElement('img');
   img.src = "assets/" + d + ".png";
@@ -207,56 +210,86 @@ function startPrediction(){
   updateCircles();
 }
 
-// 🔥 ULTRA HARD LOGIC
+// 🔥 AI LEVEL LOGIC
 function generatePrediction(nums){
-  const score=Array(10).fill(0);
-  const n=nums.length;
+  const score = Array(10).fill(0);
+  const n = nums.length;
 
-  // heavy recent weight + streak
+  // strong recent + streak
   for(let i=0;i<n;i++){
-    let w=i+1;
-    if(i>=n-3) w+=12;
-    else if(i>=n-6) w+=8;
-    else if(i>=n-10) w+=5;
+    let w = 5;
+    if(i>=n-3) w=20;
+    else if(i>=n-6) w=15;
+    else if(i>=n-10) w=10;
 
-    score[nums[i]]+=w;
+    score[nums[i]] += w;
 
-    if(i>0 && nums[i]==nums[i-1]) score[nums[i]]+=10;
+    if(i>0 && nums[i]===nums[i-1]){
+      score[nums[i]] += 12;
+    }
   }
 
-  // frequency boost
-  nums.forEach(d=>score[d]+=4);
+  // frequency
+  const freq = Array(10).fill(0);
+  nums.forEach(d=>freq[d]++);
+  for(let d=0;d<10;d++){
+    score[d]+=freq[d]*3;
+  }
 
-  // pattern difference
+  // pattern diff
   for(let i=2;i<n;i++){
     let d1=(nums[i]-nums[i-1]+10)%10;
     let d2=(nums[i-1]-nums[i-2]+10)%10;
     if(d1===d2){
-      score[(nums[n-1]+d1)%10]+=6;
+      score[(nums[n-1]+d1)%10]+=8;
     }
   }
 
-  // mirror pattern
-  score[(10-nums[n-1])%10]+=5;
+  // mirror
+  score[(10-nums[n-1])%10]+=6;
 
-  // average trend
-  let avg=Math.round(nums.slice(-6).reduce((a,b)=>a+b)/6)%10;
-  score[avg]+=7;
+  // even/odd balance
+  let even=nums.filter(x=>x%2===0).length;
+  let odd=n-even;
+  if(even>odd){
+    for(let i=1;i<10;i+=2) score[i]+=2;
+  }else{
+    for(let i=0;i<10;i+=2) score[i]+=2;
+  }
 
-  // pick top 3
+  // high/low balance
+  let low=nums.filter(x=>x<5).length;
+  let high=n-low;
+  if(low>high){
+    for(let i=5;i<10;i++) score[i]+=2;
+  }else{
+    for(let i=0;i<5;i++) score[i]+=2;
+  }
+
+  // avoid repeat
+  score[nums[n-1]]-=10;
+
+  // probability normalize
+  let total=score.reduce((a,b)=>a+b,0);
+  let prob=score.map(s=>s/total);
+
+  function pick(){
+    let r=Math.random(),sum=0;
+    for(let i=0;i<10;i++){
+      sum+=prob[i];
+      if(r<=sum) return i;
+    }
+  }
+
   let result=[];
   let used=new Set();
 
-  for(let k=0;k<3;k++){
-    let best=-1,bs=-999;
-    for(let d=0;d<10;d++){
-      if(!used.has(d) && score[d]>bs){
-        bs=score[d];
-        best=d;
-      }
+  while(result.length<3){
+    let p=pick();
+    if(!used.has(p)){
+      result.push(p);
+      used.add(p);
     }
-    result.push(best);
-    used.add(best);
   }
 
   return result;
