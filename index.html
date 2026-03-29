@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>my predicter - 3 Results</title>
+<title>Number Predictor</title>
 
 <style>
 :root{
@@ -11,103 +11,136 @@
   --bg-start:#1a0033;
   --bg-end:#000;
 }
+
 body{
   margin:0;
   font-family:Poppins, sans-serif;
   background: radial-gradient(circle at top, var(--bg-start), var(--bg-end));
   color:#fff;
+
   display:flex;
   flex-direction:column;
   align-items:center;
-  padding:10px;
+
+  height:100vh;
+  overflow-y:auto;
 }
 
 .card{
-  width:95%;
+  width:100%;
   max-width:420px;
   background: rgba(20,20,20,0.9);
   border-radius:12px;
-  padding:12px;
-  margin:8px 0;
+  padding:10px;
+  margin:6px 0;
   text-align:center;
 }
 
-.logo{ width:84px; height:84px; border-radius:50%; margin:8px auto; display:block;}
-.title{ color:var(--accent); font-weight:700; font-size:20px; }
-.subtitle{ font-size:14px; margin-bottom:6px; }
+.logo{
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  margin:auto;
+}
 
-/* 🔥 scroll fix for 20 inputs */
+.title{
+  color:var(--accent);
+  font-weight:700;
+}
+
+.subtitle{
+  font-size:13px;
+}
+
+/* circles */
 .circle-container{
   display:grid;
   grid-template-columns: repeat(5, 1fr);
-  gap:8px;
-  justify-items:center;
-  margin:10px 0;
-  max-height:220px;
+  gap:6px;
+  margin:8px 0;
+  max-height:180px;
   overflow-y:auto;
 }
 
 .circle{
-  width:44px; height:44px;
+  width:36px;
+  height:36px;
   border-radius:50%;
-  background: rgba(60,60,60,0.45);
-  border:1.5px solid #ff00ff;
-  display:flex; align-items:center; justify-content:center;
-  font-size:12px;
+  background:#333;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:10px;
 }
-.circle img{ width:100%; height:100%; }
+.circle img{
+  width:100%;
+  height:100%;
+}
 
+/* number grid */
 .grid{
   display:grid;
   grid-template-columns: repeat(5,1fr);
-  gap:10px;
+  gap:8px;
 }
 .grid img{
-  width:52px; height:52px;
+  width:44px;
+  height:44px;
   border-radius:50%;
   cursor:pointer;
 }
-.grid img.clicked{ transform:scale(1.2); }
+.grid img.clicked{
+  transform:scale(1.2);
+}
 
+/* buttons */
 .btn{
   width:100%;
-  padding:12px;
+  padding:10px;
   border-radius:10px;
   border:0;
+  margin-top:6px;
   font-weight:700;
-  cursor:pointer;
-  margin-top:8px;
 }
-.btn-yellow{ background:#ffcc00; color:#000; }
-.btn-dark{ background:#222; color:#fff; }
+.btn-yellow{
+  background:#ffcc00;
+  color:#000;
+}
+.btn-dark{
+  background:#222;
+  color:#fff;
+}
 
+/* popup */
 .popup{
   display:none;
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.75);
+  background:rgba(0,0,0,0.8);
   align-items:center;
   justify-content:center;
 }
 .popup-content{
   background:#111;
-  padding:18px;
-  border-radius:12px;
-  text-align:center;
+  padding:16px;
+  border-radius:10px;
 }
 
 .result-images{
   display:flex;
-  gap:12px;
+  gap:10px;
   justify-content:center;
 }
 .result-images img{
-  width:64px;
-  height:64px;
+  width:50px;
+  height:50px;
   border-radius:50%;
 }
 
-.error{ color:#ff6666; }
+.error{
+  color:#ff6666;
+}
+
 </style>
 </head>
 
@@ -115,12 +148,26 @@ body{
 
 <div class="card">
   <img src="logo.png" class="logo">
-  <div class="title">SACHIN LABS</div>
+  <div class="title">Number HACK</div>
 </div>
 
 <div class="card">
-  <div class="subtitle">Enter last 20 results (20th → 1st)</div>
-  <div id="inputCircles" class="circle-container"></div>
+  <div class="subtitle">Enter last 20 results</div>
+
+  <!-- ✅ FIXED CIRCLES (APK SAFE) -->
+  <div id="inputCircles" class="circle-container">
+    <div class="circle">20th</div><div class="circle">19th</div>
+    <div class="circle">18th</div><div class="circle">17th</div>
+    <div class="circle">16th</div><div class="circle">15th</div>
+    <div class="circle">14th</div><div class="circle">13th</div>
+    <div class="circle">12th</div><div class="circle">11th</div>
+    <div class="circle">10th</div><div class="circle">9th</div>
+    <div class="circle">8th</div><div class="circle">7th</div>
+    <div class="circle">6th</div><div class="circle">5th</div>
+    <div class="circle">4th</div><div class="circle">3rd</div>
+    <div class="circle">2nd</div><div class="circle">1st</div>
+  </div>
+
   <button class="btn btn-dark" onclick="removeLast()">← Back</button>
 </div>
 
@@ -140,7 +187,9 @@ body{
 </div>
 
 <script>
-const inputCircles = document.getElementById('inputCircles');
+document.addEventListener("DOMContentLoaded", function(){
+
+const inputCircles = document.getElementById('inputCircles').children;
 const numberGrid = document.getElementById('numberGrid');
 const resultPopup = document.getElementById('resultPopup');
 const resultImages = document.getElementById('resultImages');
@@ -148,7 +197,6 @@ const popupMessage = document.getElementById('popupMessage');
 
 let userInput = [];
 
-// 🔥 create 20 circles
 const labels = [
 "20th","19th","18th","17th","16th",
 "15th","14th","13th","12th","11th",
@@ -156,14 +204,7 @@ const labels = [
 "5th","4th","3rd","2nd","1st"
 ];
 
-labels.forEach(l=>{
-  const div=document.createElement('div');
-  div.className="circle";
-  div.textContent=l;
-  inputCircles.appendChild(div);
-});
-
-// 🔢 number buttons
+// create numbers
 for(let d=0; d<=9; d++){
   const img=document.createElement('img');
   img.src=`assets/${d}.png`;
@@ -186,12 +227,11 @@ function removeLast(){
 }
 
 function updateCircles(){
-  const circles=inputCircles.children;
   for(let i=0;i<20;i++){
     if(userInput[i]!=undefined){
-      circles[i].innerHTML=`<img src="assets/${userInput[i]}.png">`;
+      inputCircles[i].innerHTML=`<img src="assets/${userInput[i]}.png">`;
     }else{
-      circles[i].textContent=labels[i];
+      inputCircles[i].textContent=labels[i];
     }
   }
 }
@@ -201,14 +241,14 @@ function startPrediction(){
     showError("Enter 20 results first!");
     return;
   }
-  const res=generatePrediction(userInput);
-  showResult(res);
+
+  const result = generatePrediction(userInput);
+  showResult(result);
 
   userInput=[];
   updateCircles();
 }
 
-// 🔥 ADVANCED LOGIC
 function generatePrediction(nums){
   const score=Array(10).fill(0);
   const n=nums.length;
@@ -223,10 +263,8 @@ function generatePrediction(nums){
     if(i>0 && nums[i]==nums[i-1]) score[nums[i]]+=4;
   }
 
-  // frequency
   nums.forEach(d=>score[d]+=2);
 
-  // avg
   const avg=Math.round(nums.slice(-5).reduce((a,b)=>a+b)/5)%10;
   score[avg]+=5;
 
@@ -236,7 +274,7 @@ function generatePrediction(nums){
   for(let k=0;k<3;k++){
     let best=-1,bs=-999;
     for(let d=0;d<10;d++){
-      if(!used.has(d)&&score[d]>bs){
+      if(!used.has(d) && score[d]>bs){
         bs=score[d];
         best=d;
       }
@@ -257,6 +295,7 @@ function showResult(pred){
   });
   popupMessage.textContent="Next Results";
   resultPopup.style.display="flex";
+
   setTimeout(()=>resultPopup.style.display="none",3000);
 }
 
@@ -265,6 +304,7 @@ function showError(msg){
   popupMessage.className="error";
   popupMessage.textContent=msg;
   resultPopup.style.display="flex";
+
   setTimeout(()=>{
     resultPopup.style.display="none";
     popupMessage.className="";
@@ -272,6 +312,8 @@ function showError(msg){
 }
 
 updateCircles();
+
+});
 </script>
 
 </body>
